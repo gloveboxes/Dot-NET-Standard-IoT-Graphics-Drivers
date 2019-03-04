@@ -1,7 +1,7 @@
 using System;
 using System.Drawing;
 
-namespace Glovebox.Graphics.Grid
+namespace Glovebox.Graphics.LedType
 {
 
     /// <summary>

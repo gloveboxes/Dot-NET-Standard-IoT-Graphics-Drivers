@@ -1,7 +1,7 @@
 ﻿using System;
 using Glovebox.Graphics.Drivers;
 using Glovebox.Graphics.Interfaces;
-using Glovebox.Graphics.SevenSegmentDisplay;
+using Glovebox.Graphics.LedType;
 
 namespace Glovebox.Graphics.Components
 {

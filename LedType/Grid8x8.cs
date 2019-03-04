@@ -5,7 +5,7 @@ using System.Threading;
 using Glovebox.Graphics;
 using Glovebox.Graphics.Font;
 
-namespace Glovebox.Graphics.Grid
+namespace Glovebox.Graphics.LedType
 {
     public class Grid8x8 : GridBase
     {
@@ -230,7 +230,7 @@ namespace Glovebox.Graphics.Grid
             {
                 for (int row = 0; row < 8; row++)
                 {
-                    FrameSet((charBytes[col] & (byte)(1 << row)) == 0 ? Color.Black : Color.White, row * 8 + col, panel);
+                    FrameSet((charBytes[col] & (byte)(1 << row)) == 0 ? Color.Black : color, row * 8 + col, panel);
                 }
             }
         }

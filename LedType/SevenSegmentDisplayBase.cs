@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Glovebox.Graphics.SevenSegmentDisplay
+namespace Glovebox.Graphics.LedType
 {
     public class SevenSegmentDisplayBase
     {
