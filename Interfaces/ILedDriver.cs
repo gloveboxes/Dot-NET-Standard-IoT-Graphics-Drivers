@@ -1,8 +1,9 @@
 ﻿
 using System.Drawing;
+using Glovebox.Graphics.Drivers;
 using static Glovebox.Graphics.Drivers.LedDriver;
 
-namespace Glovebox.Graphics.Drivers {
+namespace Glovebox.Graphics.Interfaces {
     
     public interface ILedDriver {
 

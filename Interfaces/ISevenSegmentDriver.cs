@@ -1,5 +1,7 @@
 
-namespace Glovebox.Graphics.Drivers
+using Glovebox.Graphics.Drivers;
+
+namespace Glovebox.Graphics.Interfaces
 {
     public interface ISevenSegmentDriver 
     {

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Device.I2c;
 using System.Device.I2c.Drivers;
 using System.Drawing;
+using Glovebox.Graphics.Interfaces;
 
 namespace Glovebox.Graphics.Drivers
 {

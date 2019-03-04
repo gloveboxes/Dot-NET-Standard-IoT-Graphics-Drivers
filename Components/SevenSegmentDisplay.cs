@@ -1,5 +1,6 @@
 ﻿using System;
 using Glovebox.Graphics.Drivers;
+using Glovebox.Graphics.Interfaces;
 using Glovebox.Graphics.SevenSegmentDisplay;
 
 namespace Glovebox.Graphics.Components

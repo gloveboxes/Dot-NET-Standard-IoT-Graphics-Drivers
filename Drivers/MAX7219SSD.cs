@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 // using Windows.Devices.Spi;
 using System.Device.Spi;
 using System.Device.Spi.Drivers;
+using Glovebox.Graphics.Interfaces;
 
 namespace Glovebox.Graphics.Drivers
 {

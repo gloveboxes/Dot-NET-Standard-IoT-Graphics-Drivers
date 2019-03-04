@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using Glovebox.Graphics.Interfaces;
 
 namespace Glovebox.Graphics.Drivers
 {

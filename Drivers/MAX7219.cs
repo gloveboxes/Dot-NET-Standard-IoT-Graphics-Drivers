@@ -6,6 +6,7 @@ using System.Device.Spi;
 using System.Device.Spi.Drivers;
 using System.Drawing;
 using static Glovebox.Graphics.Drivers.LedDriver;
+using Glovebox.Graphics.Interfaces;
 
 namespace Glovebox.Graphics.Drivers
 {
