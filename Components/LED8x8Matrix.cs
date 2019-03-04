@@ -1,32 +1,46 @@
 ﻿using Glovebox.Graphics.Drivers;
+using Glovebox.Graphics.Font;
 using Glovebox.Graphics.Grid;
 using System;
+using System.Drawing;
 
-namespace Glovebox.Graphics.Components {
-    public class LED8x8Matrix : Grid8x8, ILedDriver {
+namespace Glovebox.Graphics.Components
+{
+    public class LED8x8Matrix : Grid8x8, ILedDriver
+    {
 
-        ILedDriver driver;
+        private readonly ILedDriver _driver;
 
-        public LED8x8Matrix(ILedDriver driver) : base("matrix", driver.PanelsPerFrame) {
-            this.driver = driver;
+
+        public LED8x8Matrix(ILedDriver driver, IFont font) : base("matrix", font, driver.PanelsPerFrame)
+        {
+            _driver = driver;
         }
 
-        public int PanelsPerFrame {
-            get {
-                return driver.PanelsPerFrame;
+        public int PanelsPerFrame
+        {
+            get
+            {
+                return _driver.PanelsPerFrame;
             }
         }
 
-        public void SetBlinkRate(LedDriver.BlinkRate blinkrate) {
-            driver.SetBlinkRate(blinkrate);
+        public byte Brightness
+        {
+            set { _driver.Brightness = value; }
         }
 
-        public void SetBrightness(byte level) {
-            driver.SetBrightness(level);
+        public LedDriver.BlinkRate Blink
+        {
+            set
+            {
+                _driver.Blink = value;
+            }
         }
 
-        public void SetFrameState(LedDriver.Display state) {
-            driver.SetFrameState(state);
+        public void SetFrameState(LedDriver.Display state)
+        {
+            _driver.SetFrameState(state);
         }
 
         public void Write(ulong[] frame)
@@ -34,13 +48,15 @@ namespace Glovebox.Graphics.Components {
             throw new NotImplementedException();
         }
 
-        public void Write(Pixel[] frame) {
+        public void Write(Color[] frame)
+        {
             // never called - implementation is overridden
             throw new NotImplementedException();
         }
 
-        protected override void FrameDraw(Pixel[] frame) {
-            driver.Write(frame);
+        protected override void FrameDraw(Color[] frame)
+        {
+            _driver.Write(frame);
         }
     }
 }

@@ -1,160 +1,124 @@
-namespace Glovebox.Graphics {
+using System.Drawing;
+using System.Threading;
+
+namespace Glovebox.Graphics
+{
 
 
     /// <summary>
-    /// Frame primatives - generic across Rings, Stips and Grids
+    /// Frame primitives - generic across Rings, Stips and Grids
     /// </summary>
-    public class FrameBase {
+    public class FrameBase
+    {
 
-        #region Pixel Colour Definitions
+        private readonly int ColorCount;
 
-        /// <summary>
-        /// NeoPixels run medium bright and cool on this palette
-        /// </summary>
-        public static Pixel[] PaletteWarmLowPower = new Pixel[] {
-            Colour.WarmRed,
-            Colour.WarmOrange,
-            Colour.WarmYellow,
-            Colour.WarmGreen,
-            Colour.WarmBlue,
-            Colour.WarmPurple, 
-            //Pixel.ColourLowPower.WarmIndigo
-        };
-
-        /// <summary>
-        /// NeoPixels run dim and cool on this palette
-        /// </summary>
-        public static Pixel[] PaletteCoolLowPower = new Pixel[] {
-            Colour.CoolRed,
-            Colour.CoolOrange,
-            Colour.CoolYellow,
-            Colour.CoolGreen,
-            Colour.CoolBlue,
-            Colour.CoolPurple,
-        };
-
-        /// <summary>
-        /// NeoPixels run bright but cool on this palette
-        /// </summary>
-        public static  Pixel[] PaletteHotLowPower = new Pixel[] {
-            Colour.HotRed,
-            Colour.HotOrange,
-            Colour.HotYellow,
-            Colour.HotGreen,
-            Colour.HotBlue,
-            Colour.HotPurple,
-        };
-
-        protected static Pixel[] PaletteFullColour = new Pixel[]
+        public int Length
         {
-            Colour.White,
-            Colour.Black,
-            Colour.Red,
-            Colour.Orange,
-            Colour.Yellow,
-            Colour.Green,
-            Colour.Purple,
-            Colour.Blue,
-        };
-        #endregion
-
-
-        private readonly int pixelCount;
-
-        public int Length {
-            get { return pixelCount; }
+            get { return ColorCount; }
         }
 
+        public Color[] Frame { get; set; }
 
-        public Pixel[] Frame { get; set; }
+        private Color[] blinkFrame;
+        public FrameBase(int _ColorCount)
+        {
+            ColorCount = _ColorCount;
+            Frame = new Color[ColorCount];
 
-        private Pixel[] blinkFrame;
-        public FrameBase(int _pixelCount) {
-            pixelCount = _pixelCount;
-            Frame = new Pixel[pixelCount];
-
-            //lazy initialise in the black/blank in the blink method
-            blinkFrame = new Pixel[pixelCount];
+            //lazy initialize in the black/blank in the blink method
+            blinkFrame = new Color[ColorCount];
 
             // init frame to all black - specifically not null
             FrameClear();
         }
 
         #region Primitive Frame Manipulation Methods
-        public void FrameClear() {
-            FrameSet(Colour.Black);
+        public void FrameClear()
+        {
+            FrameSet(Color.Black);
         }
 
         /// <summary>
         /// Fill entire frame with one colour
         /// </summary>
-        /// <param name="pixel"></param>
-        public void FrameSet(Pixel pixel) {
-            for (int i = 0; i < Frame.Length; i++) {
-                Frame[i] = pixel;
+        /// <param name="Color"></param>
+        public void FrameSet(Color Color)
+        {
+            for (int i = 0; i < Frame.Length; i++)
+            {
+                Frame[i] = Color;
             }
         }
 
         /// <summary>
         /// Fill entire frame with one colour
         /// </summary>
-        /// <param name="pixel"></param>
-        public virtual void FrameSet(Pixel pixel, int position) {
+        /// <param name="Color"></param>
+        public virtual void FrameSet(Color Color, int position)
+        {
             if (position < 0) { return; }
 
-            Frame[position % Length] = pixel;
+            Frame[position % Length] = Color;
         }
 
         /// <summary>
-        /// set specific frame pixels a colour - useful for letters on grids, patterns etc
+        /// set specific frame Colors a colour - useful for letters on grids, patterns etc
         /// </summary>
         /// <param name="colour"></param>
-        /// <param name="pixelPos"></param>
-        public void FrameSet(Pixel colour, int[] pixelPos) {
-            for (int i = 0; i < pixelPos.Length; i++) {
-                if (pixelPos[i] < 0 || pixelPos[i] >= Frame.Length) { continue; }
-                Frame[pixelPos[i]] = colour;
+        /// <param name="ColorPos"></param>
+        public void FrameSet(Color colour, int[] ColorPos)
+        {
+            for (int i = 0; i < ColorPos.Length; i++)
+            {
+                if (ColorPos[i] < 0 || ColorPos[i] >= Frame.Length) { continue; }
+                Frame[ColorPos[i]] = colour;
             }
         }
 
         /// <summary>
-        /// set specific frame pixels from a rolling palette of colours
+        /// set specific frame Colors from a rolling palette of colours
         /// </summary>
-        /// <param name="pixelPos"></param>
+        /// <param name="ColorPos"></param>
         /// <param name="palette"></param>
-        public void FrameSet(Pixel[] palette, int[] pixelPos) {
-            for (int i = 0; i < pixelPos.Length; i++) {
-                if (pixelPos[i] < 0 || pixelPos[i] >= Frame.Length) { continue; }
-                Frame[pixelPos[i]] = palette[i % palette.Length];
-            }
-        }
-
-
-        /// <summary>
-        /// fill frame pixels from a specified position and repeat 
-        /// </summary>
-        /// <param name="pixel"></param>
-        /// <param name="startPos"></param>
-        /// <param name="repeat"></param>
-        public void FrameSet(Pixel pixel, int startPos, int repeat = 1) {
-            if (startPos < 0 | repeat < 0) { return; }
-
-            for (int i = startPos, r = 0; r < repeat; i++, r++) {
-                Frame[i % Frame.Length] = pixel;
+        public void FrameSet(Color[] palette, int[] ColorPos)
+        {
+            for (int i = 0; i < ColorPos.Length; i++)
+            {
+                if (ColorPos[i] < 0 || ColorPos[i] >= Frame.Length) { continue; }
+                Frame[ColorPos[i]] = palette[i % palette.Length];
             }
         }
 
         /// <summary>
-        /// fill frame pixels from a specified position and repeat from a palette of colours
+        /// fill frame Colors from a specified position and repeat 
         /// </summary>
-        /// <param name="pixel"></param>
+        /// <param name="Color"></param>
         /// <param name="startPos"></param>
         /// <param name="repeat"></param>
-        public void FrameSet(Pixel[] pixel, int startPos, int repeat = 1) {
+        public void FrameSet(Color Color, int startPos, int repeat = 1)
+        {
             if (startPos < 0 | repeat < 0) { return; }
 
-            for (int i = startPos, r = 0; r < repeat; i++, r++) {
-                Frame[i % Frame.Length] = pixel[i % pixel.Length];
+            for (int i = startPos, r = 0; r < repeat; i++, r++)
+            {
+                Frame[i % Frame.Length] = Color;
+            }
+        }
+
+        /// <summary>
+        /// fill frame Colors from a specified position and repeat from a palette of colours
+        /// </summary>
+        /// <param name="Color"></param>
+        /// <param name="startPos"></param>
+        /// <param name="repeat"></param>
+        public void FrameSet(Color[] Color, int startPos, int repeat = 1)
+        {
+            if (startPos < 0 | repeat < 0) { return; }
+
+            for (int i = startPos, r = 0; r < repeat; i++, r++)
+            {
+                Frame[i % Frame.Length] = Color[i % Color.Length];
             }
         }
 
@@ -162,8 +126,10 @@ namespace Glovebox.Graphics {
         /// fill frame from a rolling pallet
         /// </summary>
         /// <param name="palette"></param>
-        public void FrameSet(Pixel[] palette) {
-            for (int i = 0; i < Frame.Length; i++) {
+        public void FrameSet(Color[] palette)
+        {
+            for (int i = 0; i < Frame.Length; i++)
+            {
                 Frame[i] = palette[i % palette.Length];
             }
         }
@@ -172,26 +138,33 @@ namespace Glovebox.Graphics {
         /// fill frame with blocks of colour from a palette
         /// </summary>
         /// <param name="palette"></param>
-        public void FrameSetBlocks(Pixel[] palette) {
-            if (palette == null || palette.Length == 0) {
+        public void FrameSetBlocks(Color[] palette)
+        {
+            if (palette == null || palette.Length == 0)
+            {
                 FrameClear();
             }
-            else if (palette.Length >= pixelCount) {
+            else if (palette.Length >= ColorCount)
+            {
                 FrameSet(palette);
             }
-            else {
-                var leftovers = pixelCount % palette.Length;
+            else
+            {
+                var leftovers = ColorCount % palette.Length;
                 int leftoversUsed = 0;
-                int thisPixel = 0;
-                uint baseBlockSize = (uint)(pixelCount / palette.Length);
-                for (int i = 0; i < palette.Length; i++) {
-                    for (int j = 0; j < baseBlockSize; j++) {
-                        Frame[thisPixel] = palette[i];
-                        thisPixel++;
+                int thisColor = 0;
+                uint baseBlockSize = (uint)(ColorCount / palette.Length);
+                for (int i = 0; i < palette.Length; i++)
+                {
+                    for (int j = 0; j < baseBlockSize; j++)
+                    {
+                        Frame[thisColor] = palette[i];
+                        thisColor++;
                     }
-                    if (leftoversUsed < leftovers) {
-                        Frame[thisPixel] = palette[i];
-                        thisPixel++;
+                    if (leftoversUsed < leftovers)
+                    {
+                        Frame[thisColor] = palette[i];
+                        thisColor++;
                         leftoversUsed++;
                     }
                 }
@@ -200,78 +173,88 @@ namespace Glovebox.Graphics {
 
 
         /// <summary>
-        /// Swap specified pixels with wrap
+        /// Swap specified Colors with wrap
         /// </summary>
-        /// <param name="pixel1"></param>
-        /// <param name="pixel2"></param>
-        public void FramePixelSwap(int pixel1, int pixel2) {
-            if (pixel1 < 0 | pixel2 < 0) { return; }
+        /// <param name="Color1"></param>
+        /// <param name="Color2"></param>
+        public void FrameColorSwap(int Color1, int Color2)
+        {
+            if (Color1 < 0 | Color2 < 0) { return; }
 
-            Pixel temp = Frame[pixel2 % pixelCount];
-            Frame[pixel2 % pixelCount] = Frame[pixel1 % pixelCount];
-            Frame[pixel1 % pixelCount] = temp;
+            Color temp = Frame[Color2 % ColorCount];
+            Frame[Color2 % ColorCount] = Frame[Color1 % ColorCount];
+            Frame[Color1 % ColorCount] = temp;
         }
 
-        public void FramePixelForward(int pixelIndex, int stepSize = 1) {
-            if (pixelIndex < 0 | stepSize < 0) { return; }
+        public void FrameColorForward(int ColorIndex, int stepSize = 1)
+        {
+            if (ColorIndex < 0 | stepSize < 0) { return; }
 
-            if (pixelIndex >= Frame.Length) { return; }
+            if (ColorIndex >= Frame.Length) { return; }
 
             int length = Frame.Length;
-            int newIndex = (pixelIndex + stepSize) % length;
+            int newIndex = (ColorIndex + stepSize) % length;
 
-            Pixel p = Frame[newIndex];
-            Frame[newIndex] = Frame[pixelIndex];
-            Frame[pixelIndex] = p;
+            Color p = Frame[newIndex];
+            Frame[newIndex] = Frame[ColorIndex];
+            Frame[ColorIndex] = p;
         }
 
 
         /// <summary>
-        /// Shift wrap forward a block of pixels by specified amount
+        /// Shift wrap forward a block of Colors by specified amount
         /// </summary>
         /// <param name="blockSize"></param>
-        public void FrameShiftForward(int blockSize = 1) {
+        public void FrameShiftForward(int blockSize = 1)
+        {
             if (blockSize < 0) { return; }
 
             blockSize = blockSize % Length;
 
             int i;
-            Pixel[] temp = new Pixel[blockSize];
+            Color[] temp = new Color[blockSize];
 
-            for (i = 0; i < blockSize; i++) {
+            for (i = 0; i < blockSize; i++)
+            {
                 temp[i] = Frame[Frame.Length - blockSize + i];
             }
 
-            for (i = Frame.Length - 1; i >= blockSize; i--) {
+            for (i = Frame.Length - 1; i >= blockSize; i--)
+            {
                 Frame[i] = Frame[i - blockSize];
             }
 
-            for (i = 0; i < blockSize; i++) {
+            for (i = 0; i < blockSize; i++)
+            {
                 Frame[i] = temp[i];
             }
         }
 
         /// <summary>
-        /// Shift wrap forward a block of pixels by specified amount
+        /// Shift wrap forward a block of Colors by specified amount
         /// </summary>
         /// <param name="blockSize"></param>
-        public void FrameShiftBack(int blockSize = 1) {
+        public void FrameShiftBack(int blockSize = 1)
+        {
             if (blockSize < 0) { return; }
 
             blockSize = blockSize % Length;
 
             int i;
-            Pixel[] temp = new Pixel[blockSize];
+            Color[] temp = new Color[blockSize];
 
-            for (i = 0; i < blockSize; i++) {
+            for (i = 0; i < blockSize; i++)
+            {
                 temp[i] = Frame[i];
             }
 
-            for (i = blockSize; i < Frame.Length; i++) {
+            for (i = blockSize; i < Frame.Length; i++)
+            {
                 Frame[i - blockSize] = Frame[i];
             }
 
-            for (i = 0; i < blockSize; i++) {
+            for (i = 0; i < blockSize; i++)
+            {
                 int p = Frame.Length - blockSize + i;
                 Frame[p] = temp[i];
             }
@@ -279,10 +262,11 @@ namespace Glovebox.Graphics {
 
 
         /// <summary>
-        /// cycle the pixels moving them up by increment pixels
+        /// cycle the Colors moving them up by increment Colors
         /// </summary>
         /// <param name="increment">number of positions to shift. Negative numbers backwards. If this is more than the number of LEDs, the result wraps</param>
-        public void FrameShift(int increment = 1) {
+        public void FrameShift(int increment = 1)
+        {
             if (increment > 0) { FrameShiftForward(increment); }
             else if (increment < 0) { FrameShiftBack(System.Math.Abs(increment)); }
         }
@@ -290,11 +274,13 @@ namespace Glovebox.Graphics {
         /// <summary>
         /// Forces an update with the current contents of currentDisplay
         /// </summary>
-        public void FrameDraw() {
+        public void FrameDraw()
+        {
             FrameDraw(Frame);
         }
 
-        protected virtual void FrameDraw(Pixel[] frame) {
+        protected virtual void FrameDraw(Color[] frame)
+        {
         }
 
         #endregion
@@ -302,67 +288,59 @@ namespace Glovebox.Graphics {
         #region Higher Level Display Methods
 
         /// <summary>
-        /// move a singel pixel around (or along) the ring (or strip) - always starts at position 0
+        /// move a singel Color around (or along) the ring (or strip) - always starts at position 0
         /// </summary>
-        /// <param name="pixelColour">Colour of the pixel to show</param>
+        /// <param name="ColorColour">Colour of the Color to show</param>
         /// <param name="cycles">Number of whole cycles to rotate</param>
         /// <param name="stepDelay">Delay between steps (ms)</param>
-        public void SpinColour(Pixel pixelColour, int cycles = 1, int stepDelay = 250) {
-            SpinColourOnBackground(pixelColour, Colour.Black, cycles, stepDelay);
+        public void SpinColour(Color ColorColour, int cycles = 1, int stepDelay = 250)
+        {
+            SpinColourOnBackground(ColorColour, Color.Black, cycles, stepDelay);
         }
 
-        public void SpinColourOnBackground(Pixel pixelColour, Pixel backgroundColour, int cycles = 1, int stepDelay = 250) {
+        public void SpinColourOnBackground(Color ColorColour, Color backgroundColour, int cycles = 1, int stepDelay = 250)
+        {
             if (cycles < 0 || stepDelay < 0) { return; }
 
             FrameSet(backgroundColour);
-            FrameSet(pixelColour, new int[] { 0 });
+            FrameSet(ColorColour, new int[] { 0 });
 
             FrameDraw();
 
-            for (int i = 0; i < cycles; i++) {
-                for (int j = 0; j < pixelCount; j++) {
+            for (int i = 0; i < cycles; i++)
+            {
+                for (int j = 0; j < ColorCount; j++)
+                {
                     FrameShift();
                     FrameDraw();
-                    Util.Delay(stepDelay);
+                    // Util.Delay(stepDelay);
+                    Thread.Sleep(stepDelay);
                 }
             }
         }
 
-        protected void Blink(int blinkDelay, int repeat) {
+        protected void FrameBlink(int blinkDelay, int repeat)
+        {
             if (blinkDelay < 0 || repeat < 0) { return; }
 
-            if (blinkFrame[0] == null) {
-                for (int i = 0; i < blinkFrame.Length; i++) {
-                    blinkFrame[i] = Colour.Black;
+            if (blinkFrame[0] == null)
+            {
+                for (int i = 0; i < blinkFrame.Length; i++)
+                {
+                    blinkFrame[i] = Color.Black;
                 }
             }
 
-            for (int i = 0; i < repeat; i++) {
-                Util.Delay(blinkDelay);
+            for (int i = 0; i < repeat; i++)
+            {
+                // Util.Delay(blinkDelay);
+                Thread.Sleep(blinkDelay);
                 FrameDraw(blinkFrame);
-                Util.Delay(blinkDelay);
+                Thread.Sleep(blinkDelay);
+                // Util.Delay(blinkDelay);
                 FrameDraw();
             }
         }
         #endregion
-
-
-        /// <summary>
-        /// pass a PixelColour enum and get the corresponding Pixel of that colour
-        /// assumes that the colourList and the PixelColour enum are in sync
-        /// </summary>
-        /// <param name="pixelColour">PixelColour of the pixel required</param>
-        /// <returns></returns>
-        protected Pixel getPixel(PixelColour pixelColour) {
-            return PaletteFullColour[(int)pixelColour];
-        }
-
-        protected Pixel[] GetColourListFromColourSet(PixelColour[] colourSet) {
-            var colourList = new Pixel[colourSet.Length];
-            for (int i = 0; i < colourSet.Length; i++) {
-                colourList[i] = getPixel(colourSet[i]);
-            }
-            return colourList;
-        }
     }
 }

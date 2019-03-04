@@ -21,15 +21,22 @@ namespace Glovebox.Graphics.Components
             }
         }
 
+        public byte Brightness { set { driver.Brightness = value; } }
+
         // public void SetBlinkRate(LedDriver.BlinkRate blinkrate)
         // {
         //     driver.SetBlinkRate(blinkrate);
         // }
 
-        public void SetBrightness(byte level)
-        {
-            driver.SetBrightness(level);
-        }
+        //      public byte Brightness
+        // {
+        //     set { driver.SetBrightness(value);}
+        // }
+
+        // public void SetBrightness(byte level)
+        // {
+        //     driver.SetBrightness(level);
+        // }
 
         public void SetFrameState(LedDriver.Display state)
         {

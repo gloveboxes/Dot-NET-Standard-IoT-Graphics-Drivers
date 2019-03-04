@@ -4,14 +4,13 @@ using System.Threading.Tasks;
 // using Windows.Devices.Spi;
 using System.Device.Spi;
 using System.Device.Spi.Drivers;
+using System.Drawing;
+using static Glovebox.Graphics.Drivers.LedDriver;
 
 namespace Glovebox.Graphics.Drivers
 {
     public class MAX7219 : ILedDriver, IDisposable
     {
-
-
-
         protected byte[] SendDataBytes;
 
         // http://datasheets.maximintegrated.com/en/ds/MAX7219-MAX7221.pdf
@@ -27,6 +26,19 @@ namespace Glovebox.Graphics.Drivers
         protected UnixSpiDevice SpiDisplay;
 
         public int PanelsPerFrame { get; protected set; }
+        public byte Brightness
+        {
+            set
+            {
+                if (value >= 0 && value < 16)
+                {
+                    MODE_INTENSITY[1] = value;
+                    InitPanel(MODE_INTENSITY);
+                }
+            }
+        }
+
+        public BlinkRate Blink { set { } }
 
         public enum Rotate
         {
@@ -64,10 +76,9 @@ namespace Glovebox.Graphics.Drivers
             this.transform = transform;
             this.chipSelect = chipSelect;
             this.busId = busId;
-            // this.SPIControllerName = SPIControllerName;
 
             SendDataBytes = new byte[2 * PanelsPerFrame];
-            
+
             InitializeSpi();
             InitializeDisplay();
         }
@@ -82,7 +93,7 @@ namespace Glovebox.Graphics.Drivers
             {
                 var connectionSettings = new SpiConnectionSettings((int)busId, (int)chipSelect)
                 {
-                    ClockFrequency = 10000000,
+                    ClockFrequency = 10_000_000,
                     Mode = System.Device.Spi.SpiMode.Mode0
                 };
 
@@ -127,19 +138,6 @@ namespace Glovebox.Graphics.Drivers
             SpiDisplay.Write(SendDataBytes);
         }
 
-        public void SetBlinkRate(LedDriver.BlinkRate blinkrate)
-        {
-
-        }
-
-        public void SetBrightness(byte level)
-        {
-            if (level >= 0 && level < 16)
-            {
-                MODE_INTENSITY[1] = level;
-                InitPanel(MODE_INTENSITY);
-            }
-        }
 
         public void SetFrameState(LedDriver.Display state)
         {
@@ -153,7 +151,6 @@ namespace Glovebox.Graphics.Drivers
         public void Write(ulong[] input)
         {
             byte row;
-
 
             // perform any required display rotations
             for (int rotations = 0; rotations < (int)rotate; rotations++)
@@ -192,17 +189,17 @@ namespace Glovebox.Graphics.Drivers
             }
         }
 
-        public void Write(Pixel[] frame)
+        public void Write(Color[] frame)
         {
             ulong[] output = new ulong[PanelsPerFrame];
             ulong pixelState = 0;
 
             for (int panels = 0; panels < PanelsPerFrame; panels++)
             {
-
                 for (int i = panels * 64; i < 64 + (panels * 64); i++)
                 {
-                    pixelState = frame[i].ColourValue > 0 ? 1UL : 0;
+                    // mask to rgb only AND out the A channel
+                    pixelState = (frame[i].ToArgb() & 0xffffff) > 0 ? 1UL : 0;
                     pixelState = pixelState << i;
                     output[panels] = output[panels] | pixelState;
                 }

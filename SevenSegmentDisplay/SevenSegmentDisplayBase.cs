@@ -1,7 +1,9 @@
 ﻿using System;
 
-namespace Glovebox.Graphics.SevenSegmentDisplay {
-    public class SevenSegmentDisplayBase {
+namespace Glovebox.Graphics.SevenSegmentDisplay
+{
+    public class SevenSegmentDisplayBase
+    {
         int panelsPerFrame = 0;
         ulong[] frame;
 
@@ -22,7 +24,8 @@ namespace Glovebox.Graphics.SevenSegmentDisplay {
                     |--8--|.128
         */
 
-        public enum Symbols : byte {
+        public enum Symbols : byte
+        {
             degrees = 99,
         }
 
@@ -98,18 +101,22 @@ namespace Glovebox.Graphics.SevenSegmentDisplay {
         #endregion font
 
 
-        public SevenSegmentDisplayBase(string name, int panelsPerFrame) {
+        public SevenSegmentDisplayBase(string name, int panelsPerFrame)
+        {
             if (panelsPerFrame < 1) { throw new Exception("Number of panels must be greater than zero"); }
             this.panelsPerFrame = panelsPerFrame;
             frame = new ulong[this.panelsPerFrame];
         }
 
-        public void DrawString(int number, int panel = 0) {
+        public void DrawString(int number, int panel = 0)
+        {
             DrawString(number.ToString(), panel);
         }
 
-        public void DrawString(string data, int panel = 0) {
-            lock (deviceLock) {
+        public void DrawString(string data, int panel = 0)
+        {
+            lock (deviceLock)
+            {
                 string characters = data.ToUpper();
                 char c;
 
@@ -117,11 +124,14 @@ namespace Glovebox.Graphics.SevenSegmentDisplay {
 
                 frame[panel] = 0;
 
-                for (int i = 0; i < characters.Length; i++) {
+                for (int i = 0; i < characters.Length; i++)
+                {
                     c = characters.Substring(i, 1)[0];
-                    if (c >= ' ' && c <= 'Z') {
+                    if (c >= ' ' && c <= 'Z')
+                    {
                         if (c == '.') { frame[panel] += 128; }
-                        else {
+                        else
+                        {
                             if (i > 0) { frame[panel] <<= 8; }
                             frame[panel] += Alphanumeric[c - 32];
                         }
@@ -130,16 +140,21 @@ namespace Glovebox.Graphics.SevenSegmentDisplay {
             }
         }
 
-        public void FrameClear() {
-            lock (deviceLock) {
-                for (int i = 0; i < frame.Length; i++) {
+        public void FrameClear()
+        {
+            lock (deviceLock)
+            {
+                for (int i = 0; i < frame.Length; i++)
+                {
                     frame[i] = 0;
                 }
             }
         }
 
-        public void FrameDraw() {
-            lock (deviceLock) {
+        public void FrameDraw()
+        {
+            lock (deviceLock)
+            {
                 FrameDraw(frame);
             }
         }
