@@ -1,13 +1,12 @@
 ﻿using System;
+using System.Drawing;
 
 namespace Glovebox.Graphics.LedType
 {
     public class SevenSegmentDisplayBase
     {
-        int panelsPerFrame = 0;
-        ulong[] frame;
-
-        static object deviceLock = new object();
+        private int _panelsPerFrame = 0;
+        private Color[] _frame;
 
         // https://www.bing.com/images/search?q=seven+segment+font&view=detailv2&id=E5B74669E8DEB7C3B01D5FEDB712861418895F3E&selectedindex=3&ccid=GPOmWJAJ&simid=608030661155621312&thid=OIP.M18f3a6589009a3a91c841f33b0078937o0&mode=overlay&first=1
 
@@ -29,10 +28,7 @@ namespace Glovebox.Graphics.LedType
             degrees = 99,
         }
 
-
-
-
-        public byte[] Alphanumeric = new byte[]
+        private byte[] _alphanumeric = new byte[]
         {
             0, // space
             0, // !            
@@ -104,8 +100,8 @@ namespace Glovebox.Graphics.LedType
         public SevenSegmentDisplayBase(string name, int panelsPerFrame)
         {
             if (panelsPerFrame < 1) { throw new Exception("Number of panels must be greater than zero"); }
-            this.panelsPerFrame = panelsPerFrame;
-            frame = new ulong[this.panelsPerFrame];
+            _panelsPerFrame = panelsPerFrame;
+            _frame = new Color[64 * _panelsPerFrame];
         }
 
         public void DrawString(int number, int panel = 0)
@@ -115,26 +111,34 @@ namespace Glovebox.Graphics.LedType
 
         public void DrawString(string data, int panel = 0)
         {
-            lock (deviceLock)
+            string characters = data.ToUpper();
+            char c;
+            int segment = 0;
+
+            if (panel < 0 || panel >= _panelsPerFrame) { return; }
+
+            FrameClear();
+
+            for (int i = 0; i < characters.Length; i++)
             {
-                string characters = data.ToUpper();
-                char c;
-
-                if (panel < 0 || panel >= panelsPerFrame) { return; }
-
-                frame[panel] = 0;
-
-                for (int i = 0; i < characters.Length; i++)
+                c = characters.Substring(characters.Length - 1 - i, 1)[0];
+                if (c >= ' ' && c <= 'Z')
                 {
-                    c = characters.Substring(i, 1)[0];
-                    if (c >= ' ' && c <= 'Z')
+                    if (c == '.')
                     {
-                        if (c == '.') { frame[panel] += 128; }
-                        else
+                        _frame[segment * 8 + 7] = Color.White;
+                    }
+                    else
+                    {
+                        Byte bitmap = _alphanumeric[c - 32];
+                        for (int b = 0; b < 8; b++)
                         {
-                            if (i > 0) { frame[panel] <<= 8; }
-                            frame[panel] += Alphanumeric[c - 32];
+                            if ((bitmap & (byte)(1 << b)) != 0)
+                            {
+                                _frame[segment * 8 + b] = Color.White;
+                            }
                         }
+                        segment++;
                     }
                 }
             }
@@ -142,24 +146,20 @@ namespace Glovebox.Graphics.LedType
 
         public void FrameClear()
         {
-            lock (deviceLock)
+            for (int i = 0; i < _frame.Length; i++)
             {
-                for (int i = 0; i < frame.Length; i++)
-                {
-                    frame[i] = 0;
-                }
+                _frame[i] = Color.Black;
             }
         }
 
         public void FrameDraw()
         {
-            lock (deviceLock)
-            {
-                FrameDraw(frame);
-            }
+            FrameDraw(_frame);
         }
 
-        protected virtual void FrameDraw(ulong[] frame) { }
+        protected virtual void FrameDraw(Color[] frame)
+        {
 
+        }
     }
 }

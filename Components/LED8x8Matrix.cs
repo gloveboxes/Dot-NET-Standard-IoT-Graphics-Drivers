@@ -44,11 +44,6 @@ namespace Glovebox.Graphics.Components
             _driver.SetFrameState(state);
         }
 
-        public void Write(ulong[] frame)
-        {
-            throw new NotImplementedException();
-        }
-
         public void Write(Color[] frame)
         {
             // never called - implementation is overridden
