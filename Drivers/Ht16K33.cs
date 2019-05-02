@@ -97,7 +97,7 @@ namespace Glovebox.Graphics.Drivers
             this.i2cDevice = new UnixI2cDevice[PanelsPerFrame];
 
             _currentFrameState = _frameStates[(byte)frame];
-            Blink = blinkrate;
+            // Blink = blinkrate;
             // _currentBlinkrate = _blinkRates[(byte)blinkrate];
 
             Initialize();
